@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Nova",
+    "avatar": "https://cdn.discordapp.com/avatars/181223459202924556/931d7819c8870c7086a9f357784649de.webp",
+    "summary": "Just a friendly person",
+    "posts": [
+      "5",
+      "8",
+      "9"
+    ]
+  },
+  {
+    "id": "2",
+    "name": "James",
+    "summary": "Another friendly person",
+    "avatar": "https://cdn.discordapp.com/avatars/179254544155279368/c45a9679b63a81fc11dbe8b7bc79fc9d.webp",
+    "posts": [
+      "6",
+      "7"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Vince",
+    "summary": "A cool guy",
+    "avatar": "https://cdn.discordapp.com/avatars/155018505446490112/a_4421d3859f4c3f05f6989f91a8f7f3ab.webp",
+    "posts": [
+      "10"
+    ]
+  }
+]

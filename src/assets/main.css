@@ -1,0 +1,29 @@
+body {
+    background-color: #252545;
+    color: ghostwhite;
+    margin: 1rem;
+    padding: 0.5rem;
+}
+
+.button {
+    color: #25f525;
+    display: inline-block;
+    padding: 1rem;
+    margin: 0.25rem;
+    border: 0.25rem solid #151515;
+    box-shadow: #15151560 3px 3px;
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
