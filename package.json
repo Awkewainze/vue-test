@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite serve --host --port 80",
+    "start": "vite serve --host --port ${PORT:-8080}",
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview"
