@@ -29,8 +29,11 @@ export async function getUsers(): Promise<User[]> {
 export async function getUser(userId: string): Promise<User> {
     await addFakeLatency();
     const fakeUsers = await import("../assets/fakeUsers.json");
-
-    return fakeUsers.default.find(x => x.id === userId);
+    const user = fakeUsers.default.find(x => x.id === userId);
+    if (user == null) {
+        throw new Error("User not found");
+    }
+    return user;
 }
 
 export interface Post {
@@ -42,14 +45,19 @@ export interface Post {
 
 export async function getPostsByUserId(userId: string): Promise<Post[]> {
     await addFakeLatency();
-    const fakeUsers = await import("../assets/fakeUsers.json");
-    const postIds = new Set(fakeUsers.default.find(x => x.id === userId).posts);
+    const postIds = new Set((await getUser(userId)).posts);
     const fakePosts = await import("../assets/fakePosts.json");
     return fakePosts.default.filter(x => postIds.has(x.id));
 }
 
-export async function getPost(postId: string): Promise<Post> {
+export async function getUserPost(userId: string, postId: string): Promise<Post> {
     await addFakeLatency();
-    const fakePosts = await import("../assets/fakePosts.json");
-    return fakePosts.default.find(x => x.id === postId);
+
+    const [fakePosts, userPosts] = await Promise.all([import("../assets/fakePosts.json"), getPostsByUserId(userId)]);
+    // Ensure post exists and is user's
+    const post = fakePosts.default.find(x => x.id === postId) && userPosts.find(x => x.id === postId);
+    if (post == null) {
+        throw new Error("Post not found");
+    }
+    return post;
 }

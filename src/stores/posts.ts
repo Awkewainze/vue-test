@@ -1,32 +1,19 @@
 import {defineStore} from "pinia";
-import {Post} from "../services/userService";
+import {getUserPost, getPostsByUserId, Post} from "../services/userService";
 
 export const usePostsStore = defineStore("posts", {
     state: () => ({
-        userId: null as string,
+        postsUserId: null as string,
         posts: null as Post[],
         post: null as Post,
     }),
-    getters: {
-        getUserId() {
-            return this.userId;
-        },
-        getPosts() {
-            return this.posts;
-        },
-        getPost() {
-            return this.post;
-        }
-    },
     actions: {
-        setUserId(userId: string) {
-            this.userId = userId;
+        async fetchPosts(userId: string): Promise<void> {
+            this.postsUserId = userId;
+            this.posts = await getPostsByUserId(userId);
         },
-        setPosts(posts: Posts[]) {
-            this.posts = posts;
-        },
-        setPost(post: Post) {
-            this.post = post;
-        },
+        async fetchUserPost(userId: string, postId: string) {
+            this.post = await getUserPost(userId, postId);
+        }
     }
 });

@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import {createRouter, createWebHistory} from "vue-router";
+import {createRouter, createWebHistory, RouteLocationNormalized, RouteLocationNormalizedLoaded} from "vue-router";
 
 import Home from "./components/Home.vue";
 import UserList from "./components/UserList/UserList.vue";
@@ -13,27 +13,37 @@ import Settings from "./components/Settings.vue";
 import UserPost from "./components/UserProfile/UserPosts/UserPost.vue";
 
 import {createPinia} from "pinia";
-import {getPost, getPostsByUserId, getUser, getUsers} from "./services/userService";
-import {useUsersStore} from "./stores/users";
 import {useLoadingStore} from "./stores/loading";
 import {usePostsStore} from "./stores/posts";
-
+import {useUsersStore} from "./stores/users";
+import Error from "./components/Error.vue";
+import {useErrorStore} from "./stores/error";
 const pinia = createPinia();
+
 const routes = [
     {
         path: "/",
         component: Home
     },
     {
+        path: "/error",
+        component: Error,
+        beforeEnter(to, from, next) {
+            const errorStore = useErrorStore();
+            if (errorStore.error == null) {
+                next("/");
+                return;
+            }
+            next();
+        }
+    },
+    {
         path: "/users",
         beforeEnter: async (to, from, next) => {
             const usersStore = useUsersStore();
-            if (usersStore.getUsers.length === 0) {
+            if (usersStore.users.length === 0) {
                 const loadingStore = useLoadingStore();
-                await loadingStore.handlePrimaryLoading(async () => {
-                    const users = await getUsers();
-                    usersStore.setUsers(users);
-                });
+                await loadingStore.handlePrimaryLoading(() => usersStore.fetchUsers());
             }
             next();
         },
@@ -48,7 +58,7 @@ const routes = [
                 beforeEnter: async (to, from, next) => {
                     const userId = to.params.userId;
                     const usersStore = useUsersStore();
-                    if (usersStore.getUser?.id === userId) {
+                    if (usersStore.user?.id === userId) {
                         // No change
                         next();
                         return;
@@ -56,12 +66,16 @@ const routes = [
 
                     const postsStore = usePostsStore();
                     postsStore.$reset();
-                    const loadingStore = useLoadingStore();
-                    await loadingStore.handlePrimaryLoading(async () => {
-                        const user = await getUser(userId);
-                        usersStore.setUser(user);
-                    });
 
+                    const loadingStore = useLoadingStore();
+                    try {
+                        await loadingStore.handlePrimaryLoading(() => usersStore.fetchUserById(userId));
+                    } catch (e) {
+                        useErrorStore().error = e;
+                        console.log(e);
+                        next("/error");
+                        return;
+                    }
                     next();
                 },
                 children: [
@@ -74,19 +88,13 @@ const routes = [
                         beforeEnter: async (to, from, next) => {
                             const userId = to.params.userId;
                             const postsStore = usePostsStore();
-                            if (postsStore.getUserId === userId) {
+                            if (postsStore.postsUserId === userId) {
                                 // No change
                                 next();
                                 return;
                             }
                             const loadingStore = useLoadingStore();
-
-                            await loadingStore.handleSecondaryLoading(async () => {
-                                const posts = await getPostsByUserId(userId);
-                                postsStore.setPosts(posts);
-                                postsStore.setUserId(userId);
-                            });
-
+                            await loadingStore.handleSecondaryLoading(() => postsStore.fetchPosts(userId));
                             next();
                         },
                         children: [
@@ -95,9 +103,10 @@ const routes = [
                                 component: UserPostList,
                                 beforeEnter: async (to, from, next) => {
                                     const postsStore = usePostsStore();
+                                    // Default to the post previously being looked at
                                     // TODO There is probably a much safer way to do this
-                                    if (!to.params.postId && postsStore.getPost?.id) {
-                                        next(to.path + "/" + postsStore.getPost.id);
+                                    if (!to.params.postId && postsStore.post?.id) {
+                                        next(to.path + "/" + postsStore.post.id);
                                         return;
                                     }
                                     next();
@@ -110,18 +119,20 @@ const routes = [
                                             const postId = to.params.postId;
                                             const postsStore = usePostsStore();
 
-                                            if (postsStore.getPost?.id === postId) {
+                                            if (postsStore.post?.id === postId) {
                                                 // No change
-                                                console.log("No change");
                                                 next();
                                                 return;
                                             }
                                             const loadingStore = useLoadingStore();
-                                            await loadingStore.handleTerminalLoading(async () => {
-                                                const post = await getPost(postId);
-                                                postsStore.setPost(post);
-                                            });
-
+                                            try {
+                                                await loadingStore.handleTerminalLoading(() => postsStore.fetchUserPost(to.params.userId, postId));
+                                            } catch (e) {
+                                                useErrorStore().error = e;
+                                                console.log(e);
+                                                next("/error");
+                                                return;
+                                            }
                                             next();
                                         }
                                     }
@@ -136,6 +147,10 @@ const routes = [
     {
         path: "/settings",
         component: Settings
+    },
+    {
+        path: "/:pathMatch(.*)*",
+        redirect: '/',
     }
 ];
 
@@ -143,6 +158,13 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 });
+
+router.onError(async (error: Error, _to: RouteLocationNormalized, _from: RouteLocationNormalizedLoaded) => {
+    const errorStore = useErrorStore();
+    errorStore.error = error;
+    await router.push("/error");
+});
+
 
 
 const app = createApp(App)

@@ -6,41 +6,30 @@ export const useLoadingStore = defineStore("loading", {
         isLoadingSecondary: false,
         isLoadingTerminal: false,
     }),
-    getters: {
-        getIsLoadingPrimary() {
-            return this.isLoadingPrimary;
-        },
-        getIsLoadingSecondary() {
-            return this.isLoadingSecondary;
-        },
-        getIsLoadingTerminal() {
-            return this.isLoadingTerminal;
-        }
-    },
     actions: {
-        setIsLoadingPrimary(isLoadingPrimary: boolean) {
-            this.isLoadingPrimary = isLoadingPrimary;
-        },
-        setIsLoadingSecondary(isLoadingSecondary: boolean) {
-            this.isLoadingSecondary = isLoadingSecondary;
-        },
-        setIsLoadingTerminal(isLoadingTerminal: boolean) {
-            this.isLoadingTerminal = isLoadingTerminal;
-        },
         async handlePrimaryLoading(func: () => Promise<void>){
-            this.setIsLoadingPrimary(true);
-            await func();
-            this.setIsLoadingPrimary(false);
+            try {
+                this.isLoadingPrimary = true;
+                await func();
+            } finally {
+                this.isLoadingPrimary = false;
+            }
         },
         async handleSecondaryLoading(func: () => Promise<void>){
-            this.setIsLoadingSecondary(true);
-            await func();
-            this.setIsLoadingSecondary(false);
+            try {
+                this.isLoadingSecondary = true;
+                await func();
+            } finally {
+                this.isLoadingSecondary = false;
+            }
         },
         async handleTerminalLoading(func: () => Promise<void>){
-            this.setIsLoadingTerminal(true);
-            await func();
-            this.setIsLoadingTerminal(false);
+            try {
+                this.isLoadingTerminal = true;
+                await func();
+            } finally {
+                this.isLoadingTerminal = false;
+            }
         }
     }
 });

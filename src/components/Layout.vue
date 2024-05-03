@@ -12,7 +12,7 @@ const loadingStore = useLoadingStore();
 		<main>
 		<RouterView v-slot="{Component, route}" class="content">
 			<transition name="fade" mode="out-in">
-				<Loading v-if="loadingStore.getIsLoadingPrimary" />
+				<Loading v-if="loadingStore.isLoadingPrimary" />
 				<Component :is="Component" v-else></Component>
 			</transition>
 		</RouterView>

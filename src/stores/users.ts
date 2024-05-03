@@ -1,26 +1,17 @@
 import {defineStore} from "pinia";
-import {User} from "../services/userService";
+import {getUser, getUsers, User} from "../services/userService";
 
 export const useUsersStore = defineStore("users", {
     state: () => ({
         users: [] as User[],
         user: null as User
     }),
-    getters: {
-        getUsers() {
-            return this.users;
-        },
-        getUser() {
-            return this.user;
-        }
-    },
     actions: {
-        setUsers(newValue: User[]) {
-            this.users = newValue;
+        async fetchUsers(): Promise<void> {
+            this.users = await getUsers();
         },
-
-        setUser(user: User) {
-            this.user = user;
-        },
+        async fetchUserById(userId: string): Promise<void> {
+            this.user = await getUser(userId);
+        }
     }
 });

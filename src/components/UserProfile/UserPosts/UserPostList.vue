@@ -7,19 +7,17 @@
 
 	const loadingStore = useLoadingStore();
 	const postsStore = usePostsStore();
-
-	const route = useRoute();
 </script>
 
 <template>
 	<div class="root">
 		<div class="list">
-			<UserPostListItem v-for="post in postsStore.getPosts" :key="post.id" :post="post" />
+			<UserPostListItem v-for="post in postsStore.posts" :key="post.id" :post="post" />
 		</div>
 		<div class="post">
 			<RouterView v-slot="{Component, route}" class="content">
 				<transition name="fade" mode="out-in">
-					<Loading v-if="loadingStore.getIsLoadingTerminal" />
+					<Loading v-if="loadingStore.isLoadingTerminal" />
 					<div v-else-if="postsStore.getPost === null"></div>
 					<Component :is="Component" :key="route.path" v-else></Component>
 				</transition>

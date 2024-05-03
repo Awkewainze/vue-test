@@ -5,6 +5,6 @@
 
 <template>
 	<div>
-		<p>{{usersStore.getUser.summary}}</p>
+		<p>{{usersStore.user.summary}}</p>
 	</div>
 </template>

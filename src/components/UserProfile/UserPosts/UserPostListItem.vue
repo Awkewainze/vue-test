@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
 import {Post} from "@/services/userService";
+import {computed} from "vue";
 
 const props = defineProps<{
 	post: Post
 }>();
 const route = useRoute();
 
-const newRoute = `/users/${route.params.userId}/posts/${props.post.id}`;
+const newRoute = computed(() => `/users/${route.params.userId}/posts/${props.post.id}`);
 </script>
 
 <template>
