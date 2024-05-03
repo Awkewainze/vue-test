@@ -12,7 +12,7 @@
 			return;
 		}
 		const loadingStore = useLoadingStore();
-		await loadingStore.handleTerminalLoading(() => postsStore.fetchPost(postId));
+		await loadingStore.handleTerminalLoading(() => postsStore.fetchUserPost(to.params.userId, postId));
 		next();
 	});
 </script>
